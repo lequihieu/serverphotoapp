@@ -17,30 +17,36 @@ images.post('/add', (req, res) => {
 
     const imageData = {
         name: req.body.name,
-        url: req.body.url
+        thumb: req.body.thumb,
+        regular: req.body.regular
     }
-    
+    console.log(imageData.full_url);
+
     Image.getIdImageByName(imageData.name, function(err, row) {
         if (err) res.json(err);
         const image_id = _.get(row[0], 'id', 0);
-        
+        //if image_id exist
         if(image_id) {
             
             Image.findImageUser(image_id, user_id, function(err, results) {
                 if (err) res.json(err);
-                console.log(results[0].image_id, results[0].user_id);
+                
+                //if duplicate data on table image_user
                 if ((image_id === results[0].image_id) && (user_id === results[0].user_id)) 
                 {   
-                    console.log("abc");
                     res.json("Duplicate");
-                    return;
+                } 
+                else {
+                // if not duplicate   
+                    Image.addImageUser(image_id, user_id, function(err,row){
+                        if (err) res.json(err);
+                        res.json("Added")
+                    });
                 }
             })
-            Image.addImageUser(image_id, user_id, function(err,row){
-                if (err) res.json(err);
-                res.json("Added")
-            });
+            
         }
+        //if image_id not exist
         else {
             Image.addImage(imageData, function(err, results) {
                 if (err) res.json(err);
@@ -58,8 +64,8 @@ images.post('/add', (req, res) => {
 
 images.get('/list', (req, res) => {
 
-    var decoded = jwt.verify(req.headers['authorization'], process.env.SECRET_KEY)
-    var user_id = decoded.id;
+    const user_id = req.query.user;
+
     Image.getAllImageByUserId(user_id, function(err, rows) {
         if (err) res.json(err);
         res.json(rows);

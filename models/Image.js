@@ -8,7 +8,7 @@ var Image = {
     return db.query("SELECT * FROM images WHERE name=?", [name], callback)
   },
   addImage:function(image, callback) {
-    return db.query("INSERT INTO images(url, name) VALUES(?, ?)", [image.url, image.name], callback)
+    return db.query("INSERT INTO images(name, thumb, regular) VALUES(?, ?, ?)", [image.name, image.thumb, image.regular], callback)
   },
   getIdImageByName:function(name, callback) {
     return db.query("SELECT images.id FROM images WHERE name=?", [name], callback)
